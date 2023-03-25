@@ -1,0 +1,167 @@
+openapi: 3.0.3
+info:
+  title: E911
+  description: Provides interface to various E911 providers to implement E911 functionality
+  contact:
+    email: starkca90@gmail.com
+  license:
+    name: The Unlicense
+    url: https://unlicense.org
+  version: 0.0.0
+servers:
+- url: /api/v1
+tags:
+- name: spreadsheet
+  description: Functions pertaining to the E911 spreadsheet
+paths:
+  /spreadsheet/geocode/:
+    post:
+      tags:
+      - spreadsheet
+      summary: Populate latitude and longitude field in spreadsheet
+      description: Populate latitude and longitude fields in all entries in uploaded
+        spreadsheet
+      operationId: spreadsheet_geocode
+      requestBody:
+        description: E911 Spreadsheet
+        content:
+          text/csv:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+                x-content-type: text/csv
+        "404":
+          description: Unable to locate address
+      x-openapi-router-controller: swagger_server.controllers.spreadsheet_controller
+components:
+  schemas:
+    Source:
+      type: string
+      default: geocoder_maps
+      enum:
+      - geocoder_maps
+    Result:
+      type: number
+      enum:
+      - 200
+      - 404
+    NENA:
+      required:
+      - community_name
+      - country
+      - house_number
+      - state
+      - street_name
+      type: object
+      properties:
+        house_number:
+          type: string
+          example: "555"
+        house_number_suffix:
+          type: string
+        prefix_directional:
+          type: string
+        street_name:
+          type: string
+          example: 5th
+        street_suffix:
+          type: string
+          example: Ave
+        post_directional:
+          type: string
+        community_name:
+          type: string
+          example: New York
+        state:
+          type: string
+          example: NY
+        zip_code:
+          type: string
+          example: "10017"
+        country:
+          type: string
+          example: US
+      xml:
+        name: NENA
+    Address:
+      type: object
+      properties:
+        address:
+          type: string
+          example: 555 5th Ave New York NY 10017
+    Geocoded:
+      type: object
+      properties:
+        source:
+          $ref: '#/components/schemas/Source'
+        result:
+          $ref: '#/components/schemas/Result'
+        bounds:
+          type: array
+          example:
+          - "40.7557728"
+          - "40.7558728"
+          - "-73.9788465"
+          - "-73.9787465"
+          xml:
+            wrapped: true
+          items:
+            type: string
+            xml:
+              name: bound_coordinate
+        lat:
+          type: string
+          example: "40.7558228"
+        lon:
+          type: string
+          example: "-73.9787965"
+      example:
+        bounds:
+        - "40.7557728"
+        - "40.7558728"
+        - "-73.9788465"
+        - "-73.9787465"
+        lon: "-73.9787965"
+        source: geocoder_maps
+        result: 200
+        lat: "40.7558228"
+    Reversed:
+      type: object
+      properties:
+        source:
+          $ref: '#/components/schemas/Source'
+        house_number:
+          type: string
+          example: "555"
+        street_name:
+          type: string
+          example: 5th Ave
+        community_name:
+          type: string
+          example: New York
+        state:
+          type: string
+          example: NY
+        zip_code:
+          type: string
+          example: "10017"
+        country_code:
+          type: string
+      example:
+        country_code: country_code
+        community_name: New York
+        house_number: "555"
+        source: geocoder_maps
+        state: NY
+        street_name: 5th Ave
+        zip_code: "10017"
+
